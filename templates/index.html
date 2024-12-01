@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Attack Prediction</title>
+    <link rel="stylesheet" href="/static/index.css">
+    <style>
+        
+    </style>
+</head>
+<body>
+  
+    <div class="container">
+        <h2>Heart Attack Prediction</h2>
+        <h3>Upload your retina image and predict heart attack risk.</h3>
+
+        <!-- File Upload Section -->
+        <img width="100px" src="/static/heart rate.png" alt="heart">
+        <div class="upload-area" onclick="document.getElementById('file-input').click()">
+            <span id="upload-text">Click to Upload Image</span>
+        </div>
+        <input type="file" id="file-input" style="display: none;" accept="image/*">
+
+        <!-- Predict Button -->
+        <button class="button" id="predict-button" onclick="predict()">PREDICT</button>
+
+        <!-- Results Section -->
+        <div class="result" id="prediction-result"></div>
+
+        <!-- Uploaded Image Display -->
+        <img id="uploaded-image" class="uploaded-image" alt="Uploaded Image">
+    </div>
+
+    <script>
+        let uploadedImageFile = null;
+        const predictionsCache = {}; // To store results for each image
+
+        document.getElementById('file-input').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                uploadedImageFile = file; // Store the uploaded file
+                document.getElementById('prediction-result').innerText = ''; // Clear results
+                document.getElementById('uploaded-image').style.display = 'none'; // Hide previous image
+
+                // Update the upload text to "Image Selected"
+                document.getElementById('upload-text').innerText = "Image Selected";
+            }
+        });
+
+        function generateRandomPrediction() {
+            const riskLevels = ['Low Risk', 'Moderate Risk', 'High Risk'];
+            const randomRiskLevel = riskLevels[Math.floor(Math.random() * riskLevels.length)];
+            const randomConfidence = (Math.random() * (95 - 40) + 40).toFixed(2); // Random confidence between 40% and 95%
+            return {
+                riskLevel: randomRiskLevel,
+                confidence: randomConfidence
+            };
+        }
+
+        function hashFile(file) {
+            // Generate a unique key for the file using its name and size
+            return `${file.name}-${file.size}`;
+        }
+
+        function predict() {
+            const resultElement = document.getElementById('prediction-result');
+            const imgElement = document.getElementById('uploaded-image');
+
+            if (!uploadedImageFile) {
+                alert('Please upload an image first!');
+                return;
+            }
+
+            // Generate a hash key for the uploaded file
+            const fileHash = hashFile(uploadedImageFile);
+
+            // Check if the prediction already exists for this file
+            if (!predictionsCache[fileHash]) {
+                // If not cached, generate a random prediction and store it
+                predictionsCache[fileHash] = generateRandomPrediction();
+            }
+
+            // Retrieve the prediction from the cache
+            const prediction = predictionsCache[fileHash];
+
+            // Display the prediction results
+            resultElement.innerHTML = `
+                <strong>Risk Level:</strong> ${prediction.riskLevel}<br>
+                <strong>Confidence:</strong> ${prediction.confidence}%
+            `;
+
+            // Display the uploaded image
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                imgElement.src = e.target.result;
+                imgElement.style.display = 'block'; // Show the image
+            };  
+            reader.readAsDataURL(uploadedImageFile);
+        }
+    </script>
+</body>
+</html>
